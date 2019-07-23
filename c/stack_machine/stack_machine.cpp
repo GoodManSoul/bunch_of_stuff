@@ -7,7 +7,7 @@
 using namespace std;
 
 const int STACK_SIZE = 4;
-const int WORD_LENGTH = 16;
+
 
 enum operation{ADD, SUB, MULT, DIV};
 
