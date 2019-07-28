@@ -9,11 +9,10 @@
 using namespace std;
 
 const int STACK_SIZE = 4;
-const int PERFORMED_OPERATION_STACK = 12;
+const int PERFORMED_OPERATION_STACK = 4;
 
 enum control_mode{MANUAL, STACK};
 enum operation{ADD, SUB, MULT, DIV};
-
 
 struct stack_machine{
 	stack_machine(){
@@ -21,9 +20,11 @@ struct stack_machine{
 		reg_B = 0.0f;
 		reg_C = 0.0f;
 		reg_D = 0.0f;
+		run_flag = false;
 		stack_pointer = -1;
 		control_stack_pointer = -1;
 		performed_operation_buffer = "none";
+
 		for(int i = 0; i < STACK_SIZE; i++)
 			stack[i] = 0.0f;
 		for(int i = 0; i < PERFORMED_OPERATION_STACK; i++)
@@ -31,47 +32,52 @@ struct stack_machine{
 	}
 //////////////////////////////////////////////////////////////////////
 
+	void run(){
+
+	}
+
+	void stop(){
+		run_flag = false;
+		printf("[!]The machine had been stoped[!]\n");
+	}
+
+	void run_by_stack(){
+		run_flag = true;
+		while(run_flag){
+			printf("machine is running...\n");
+			run_flag = perform_operation();
+			sleep(2);
+		}
+		printf("machine has stop running!\n");
+	}
+
 	bool perform_operation(operation oper){
 		if(stack_pointer < 0){
 			printf("\nOpetarion can\'t be performed. The stack is empty!\n");
 			return false;
-		}
-
-		switch(oper){
-			case ADD:
-				if(stack_pointer < 1){
+		}else if(stack_pointer < 1){
 					printf("\nOpetarion can\'t be performed. Not enough operands!\n");
 					return false;
 				}	
+		switch(oper){
+			case ADD:
 				push_on_top(remove_from_top(MANUAL) + remove_from_top(MANUAL));
 			break;
 
 			case SUB: 
-				if(stack_pointer < 1){
-						printf("\nOpetarion can\'t be performed. Not enough operands!\n");
-						return false;
-					}	
-					push_on_top(remove_from_top(MANUAL) - remove_from_top(MANUAL));
+				push_on_top(remove_from_top(MANUAL) - remove_from_top(MANUAL));
 			break;
 
 			case MULT: 
-				if(stack_pointer < 1){
-						printf("\nOpetarion can\'t be performed. Not enough operands!\n");
-						return false;
-					}	
-					push_on_top(remove_from_top(MANUAL) * remove_from_top(MANUAL));
+				push_on_top(remove_from_top(MANUAL) * remove_from_top(MANUAL));
 			break;
 
-			case DIV: 
-				if(stack_pointer < 1){
-						printf("\nOpetarion can\'t be performed. Not enough operands!\n");
-						return false;
-					}	
-					push_on_top(remove_from_top(MANUAL) / remove_from_top(MANUAL));
+			case DIV:	
+				push_on_top(remove_from_top(MANUAL) / remove_from_top(MANUAL));
 			break;
 		}
-		return true;
-	}
+	return true;
+}
 
 	bool perform_operation(){
 		if(control_stack_pointer < 0){
@@ -86,46 +92,36 @@ struct stack_machine{
 					printf("\nOpetarion can\'t be performed. Not enough operands!\n");
 					return false;
 				}	
-				push_on_top(remove_from_top(MANUAL) + remove_from_top(MANUAL));
-				return true;
+			push_on_top(remove_from_top(MANUAL) + remove_from_top(MANUAL));
+			return true;
 		}
 		if(performed_operation_buffer == "SUB"){
 				if(stack_pointer < 1){
 					printf("\nOpetarion can\'t be performed. Not enough operands!\n");
 					return false;
 				}	
-				push_on_top(remove_from_top(MANUAL) - remove_from_top(MANUAL));
-				return true;
+			push_on_top(remove_from_top(MANUAL) - remove_from_top(MANUAL));
+			return true;
 		}
 		if(performed_operation_buffer == "MULT"){
 				if(stack_pointer < 1){
 					printf("\nOpetarion can\'t be performed. Not enough operands!\n");
 					return false;
 				}	
-				push_on_top(remove_from_top(MANUAL) * remove_from_top(MANUAL));
-				return true;
+			push_on_top(remove_from_top(MANUAL) * remove_from_top(MANUAL));
+			return true;
 		}
 		if(performed_operation_buffer == "DIV"){
 				if(stack_pointer < 1){
 					printf("\nOpetarion can\'t be performed. Not enough operands!\n");
 					return false;
 				}	
-				push_on_top(remove_from_top(MANUAL) / remove_from_top(MANUAL));
-				return true;
-		}
-
-		
+			push_on_top(remove_from_top(MANUAL) / remove_from_top(MANUAL));
+			return true;
+		}		
 		return true;
 	}
 
-/* 	bool run_by_stack(){
-		int index = 0;
-		
-
-
-		return true;
-	}
- */
 /* 	bool run_by_file(){
 		FILE* read_file;
 		read_file = fopen("oper.txt", "r");
@@ -178,7 +174,6 @@ struct stack_machine{
 		return true;
 	}
 
-
 	double remove_from_top(control_mode mode){
 		if(mode == MANUAL){
 			if(stack_pointer < 0){
@@ -224,6 +219,7 @@ struct stack_machine{
 	double reg_A, reg_B, reg_C, reg_D;
 	string operation_stack[PERFORMED_OPERATION_STACK];
 	string performed_operation_buffer;
+	bool run_flag;
 };
 
 int main() {
@@ -231,16 +227,34 @@ int main() {
 	system("clear");
 	printf("\n\t[!]START[!]\n");
 
-	stack_machine sm;
+	stack_machine* sm = new stack_machine();
+
+	
+	
 	
 
-	sm.print_stack();
+	sm->push_on_top(100.0f);
+	sm->push_on_top(400.0f);
+	sm->push_on_top(1000.0f);
+	sm->push_on_top(500.0f);
+	
+	sm->push_on_top("ADD");
+	sm->push_on_top("ADD");
+	sm->push_on_top("ADD");
+	sm->push_on_top("ADD");
+
+	sm->print_stack();
 	printf("\n");
-	sm.print_control_stack();
+	sm->print_control_stack();
 
-	//sm.run_by_file();
+	thread th(&stack_machine::run_by_stack, sm);
+	
+	th.join();
+
+
 	
 
+	free(sm);
 	printf("\n\t[!]END[!]\n");
 	return 0;
 }
