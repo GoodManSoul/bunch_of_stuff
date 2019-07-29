@@ -1,4 +1,5 @@
 #include <iostream>
+#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -6,6 +7,7 @@ using namespace std;
 
 const int GAME_FIELD_WIDTH = 24;
 const int GAME_FIELD_HEIGHT = 24;
+const int TETRIS_BLOCK_COUNT = 7;
 const int TETRIS_BLOCK_BASE_SIZE = 4;
 
 const char GAME_FIELD_BORDER = '#';
@@ -16,7 +18,7 @@ enum TETRIS_BLOCK{I_BLOCK, J_BLOCK, L_BLOCK, O_BLOCK, S_BLOCK, T_BLOCK, Z_BLOCK}
 class tetris_block{
     public: 
     tetris_block(TETRIS_BLOCK requested_block){
-        
+        exist = false;
         //creation of each type of block
         switch(requested_block){
             case I_BLOCK:
@@ -127,46 +129,67 @@ class tetris_block{
         char** t_block;
         int b_height;
         int b_width;
+        bool exist;
 };
 
 class console_tetris{
     public:
         console_tetris(){
+            I_block = new tetris_block(I_BLOCK);
+            J_block = new tetris_block(J_BLOCK);
+            L_block = new tetris_block(L_BLOCK);
+            O_block = new tetris_block(O_BLOCK);
+            S_block = new tetris_block(S_BLOCK);
+            T_block = new tetris_block(T_BLOCK);
+            Z_block = new tetris_block(Z_BLOCK);
+            
+            gravity_stop_line = 0;
+            falling_block_exists_on_game_field = false;
+
             create_game_field();
             fill_game_field_with_border();
+        }
+        ~console_tetris(){
+            free(I_block);
+            free(J_block);
+            free(L_block);
+            free(O_block);
+            free(S_block);
+            free(T_block);
+            free(Z_block);
         }
 /////////////////////////////////////////////////////////
     public:
         bool draw_tetris_block(int x_head, int y_head, int x_tail, int y_tail, TETRIS_BLOCK requested_block){
-            x_head = x_head + 1; // because of the game field border
-            x_tail = x_tail + 1; // because of the game field border
-            y_head = y_head + 1; // because of the game field border
-            y_tail = y_tail + 1; // because of the game field border
+
+            falling_block_exists_on_game_field = true;
 
             switch(requested_block){
                 case I_BLOCK:
-                    for(int draw_x = x_head; draw_x < GAME_FIELD_HEIGHT - 1; draw_x++){
-                        for(int draw_y = y_head; draw_y < GAME_FIELD_WIDTH - 1; draw_y++){
-                            
-                        }
-                    }
+                    paste_block_on_game_field(x_head, y_head, x_tail, y_tail, I_block);
                 break;
 
                 case J_BLOCK:
+                    paste_block_on_game_field(x_head, y_head, x_tail, y_tail, J_block);
                 break;
 
                 case L_BLOCK:
+                    paste_block_on_game_field(x_head, y_head, x_tail, y_tail, L_block);
                 break;
 
                 case O_BLOCK:
+                    paste_block_on_game_field(x_head, y_head, x_tail, y_tail, O_block);
                 break;
 
                 case S_BLOCK:
+                    paste_block_on_game_field(x_head, y_head, x_tail, y_tail, S_block);
                 break;
 
                 case T_BLOCK:
+                    paste_block_on_game_field(x_head, y_head, x_tail, y_tail, T_block);
                 break;
                 case Z_BLOCK:
+                    paste_block_on_game_field(x_head, y_head, x_tail, y_tail, Z_block);
                 break;
             };
             return true;
@@ -181,6 +204,17 @@ class console_tetris{
         }
 /////////////////////////////////////////////////////////
     protected:
+        void involve_gravity(){
+            
+
+        }
+
+        void paste_block_on_game_field(int x_head, int y_head, int x_tail, int y_tail, tetris_block *requested_block){
+            for(int paste_x = x_head + 1, t_block_index_x = 0; t_block_index_x < requested_block->b_height; paste_x++, t_block_index_x++)
+                for(int paste_y = y_head + 1, t_block_index_y = 0; t_block_index_y < requested_block->b_width; paste_y++, t_block_index_y++)
+                    game_field[paste_x][paste_y] = requested_block->t_block[t_block_index_x][t_block_index_y];                         
+        }
+
         bool fill_game_field_with_border(){
             system("clear");
 
@@ -204,6 +238,15 @@ class console_tetris{
 /////////////////////////////////////////////////////////
     public:
         char game_field[GAME_FIELD_HEIGHT][GAME_FIELD_WIDTH];
+        bool falling_block_exists_on_game_field;
+        int gravity_stop_line;
+        tetris_block* I_block;
+        tetris_block* J_block;
+        tetris_block* L_block;
+        tetris_block* O_block;
+        tetris_block* S_block;
+        tetris_block* T_block;
+        tetris_block* Z_block;
 
 };
 
@@ -211,12 +254,8 @@ int main()
 {
     console_tetris ct;
 
+    ct.draw_tetris_block(1, 1, 0, 0, L_BLOCK);
     ct.draw_game_field();
-
-    tetris_block tb(J_BLOCK);
-
-    tb.draw_block();
-    
 
     
     return 0;
