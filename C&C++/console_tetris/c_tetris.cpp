@@ -178,9 +178,13 @@ class console_tetris{
             block_pos_X = 1;
             block_pos_Y = 1;
 
-            create_game_field();
-            fill_game_field_with_border();
-            draw_game_field();
+            create_game_field(game_field);
+            create_game_field(game_field_buffer);
+
+            fill_game_field_with_border(game_field);
+            fill_game_field_with_border(game_field_buffer);
+
+            draw_game_field(game_field);
         }
         ~console_tetris(){
             free(I_block);
@@ -190,7 +194,7 @@ class console_tetris{
             free(S_block);
             free(T_block);
             free(Z_block);
-            free(CURRENT_block);
+            CURRENT_block = NULL;
         }
 /////////////////////////////////////////////////////////
     public:
@@ -198,8 +202,9 @@ class console_tetris{
         void run_game(){
             while(true){
             clear_game_field();
-            react_on_key_input(CURRENT_block); 
-            draw_game_field();
+            react_on_key_input(CURRENT_block);
+            draw_game_field(game_field_buffer); 
+            draw_game_field(game_field);
             printf("[X]: %d ", block_pos_X);
             printf("[Y]: %d\n", block_pos_Y);
             usleep(50 * 1000);
@@ -241,15 +246,15 @@ class console_tetris{
             return true;
         }
 
-        void draw_game_field(){
+        void draw_game_field(char game_f[][GAME_FIELD_WIDTH]){
             for(int gf_height = 0; gf_height < GAME_FIELD_HEIGHT; gf_height++){
                 for(int gf_width = 0; gf_width < GAME_FIELD_WIDTH; gf_width++)
-                    printf("%c", game_field[gf_height][gf_width]);
+                    printf("%c", game_f[gf_height][gf_width]);
                 printf("\n");
             } 
         }
 /////////////////////////////////////////////////////////
-    public:
+    protected:
 
         void react_on_key_input(tetris_block* requested_block){
 
@@ -272,6 +277,13 @@ class console_tetris{
             }
         }
 
+        void swicth_content_between_game_fields(char source_gf[][GAME_FIELD_WIDTH], char destination_gf[][GAME_FIELD_WIDTH]){
+            for(int x = 1; x < GAME_FIELD_HEIGHT - 1; x++)
+                for(int y = 1; y < GAME_FIELD_WIDTH - 1; y++)
+                    destination_gf[x][y] = source_gf[x][y];
+            draw_game_field(destination_gf);        
+        }
+
         void clear_game_field(){
             for(int x = 1; x < GAME_FIELD_HEIGHT - 1; x++)
                 for(int y = 1; y < GAME_FIELD_WIDTH - 1; y++){
@@ -287,7 +299,6 @@ class console_tetris{
         void fix_block_position__get_new_block(int x_head, int y_head, int x_tail, int y_tail, tetris_block* requested_block){
             
             int block_tail = block_pos_X + requested_block->b_height;
-            cout << block_tail << endl;
 
             if(block_tail == GAME_FIELD_HEIGHT - 2){
                 gravity_stop_line = block_pos_X;
@@ -295,9 +306,14 @@ class console_tetris{
                 block_pos_Y = 0;
                 CURRENT_block = get_random_block();
 
-                paste_block_on_game_field(x_head, y_head, x_tail, y_tail, CURRENT_block);
-            }else
+                swicth_content_between_game_fields(game_field, game_field_buffer);
+                clear_game_field();
+                swicth_content_between_game_fields(game_field_buffer, game_field);
+                paste_block_on_game_field(block_pos_X, block_pos_Y, x_tail, y_tail, CURRENT_block);
+            }else{
+                swicth_content_between_game_fields(game_field_buffer, game_field);
                 paste_block_on_game_field(x_head, y_head, x_tail, y_tail, CURRENT_block);        
+            }
         }
 
         tetris_block* get_random_block(){
@@ -351,7 +367,7 @@ class console_tetris{
                 } 
         }
 
-        bool fill_game_field_with_border(){
+        bool fill_game_field_with_border(char game_f[][GAME_FIELD_WIDTH]){
             system("clear");
 
             for(int gf_height = 0; gf_height < GAME_FIELD_HEIGHT; gf_height++){
@@ -359,21 +375,22 @@ class console_tetris{
                     if(gf_height == 0 || gf_height == GAME_FIELD_HEIGHT - 1 ||
                         (gf_width == 0 && (gf_height != 0 || gf_height != GAME_FIELD_HEIGHT - 1)) ||
                             (gf_width == GAME_FIELD_WIDTH - 1 && (gf_height != 0 || gf_height != GAME_FIELD_HEIGHT - 1)))
-                        game_field[gf_height][gf_width] = GAME_FIELD_BORDER;
+                        game_f[gf_height][gf_width] = GAME_FIELD_BORDER;
                 }
             }
             return true;
         }
 
-        void create_game_field(){
+        void create_game_field(char game_f[][GAME_FIELD_WIDTH]){
             for(int gf_height = 0; gf_height < GAME_FIELD_HEIGHT; gf_height++)
                 for(int gf_width = 0; gf_width < GAME_FIELD_WIDTH; gf_width++)
-                    game_field[gf_height][gf_width] = ' '; 
+                    game_f[gf_height][gf_width] = ' '; 
         }
 
 /////////////////////////////////////////////////////////
     public:
         char game_field[GAME_FIELD_HEIGHT][GAME_FIELD_WIDTH];
+        char game_field_buffer[GAME_FIELD_HEIGHT][GAME_FIELD_WIDTH];
         bool falling_block_exists_on_game_field;
         int gravity_stop_line;
         int block_pos_X;
