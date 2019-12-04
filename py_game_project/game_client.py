@@ -7,7 +7,7 @@ import pygame
 from socket import *
 
 server_ip = "192.168.0.108"
-server_recieve_port = 1497
+server_recieve_port = 1500
 
 server_address = (server_ip, server_recieve_port)
 
@@ -21,10 +21,13 @@ PLAYER_INFO = PLAYER_X, PLAYER_Y, PLAYER_W, PLAYER_H, COLOR_R, COLOR_G, COLOR_B 
 
 
 def Connect_to_server():
+    global PLAYER_INFO
     print("[...]Connecting to server[...]")
+    UDPSocket.sendto(bytes("HELLO", "utf-8"), server_address)
+    pygame.time.delay(16)
     for i in range (len(PLAYER_INFO)):
         print(PLAYER_INFO[i])
-        UDPSocket.sendto(bytes(PLAYER_INFO[i]), server_address)
+        UDPSocket.sendto(bytes([PLAYER_INFO[i]]), server_address)
     print("[!]Connect successfull[!]")
 
 

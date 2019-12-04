@@ -10,7 +10,7 @@ SERVER_IS_RUNNING = True
 server_shutdown_command = ""
 
 server_host_ip = ""
-server_recieve_port = 1497
+server_recieve_port = 1500
 server_data_buffer = 4096
 
 server_address = (server_host_ip, server_recieve_port)
@@ -44,6 +44,8 @@ PLAYER_2_INFO = PLAYER_2_X, PLAYER_2_Y, PLAYER_2_W, PLAYER_2_H, PLAYER_2_CUBE_CO
 def Get_player_address():
     global PLAYER_1_MACHINE_ADDRESS
     global PLAYER_2_MACHINE_ADDRESS
+    global PLAYER_1_INFO
+    global PLAYER_2_INFO
     while 1:
         # if(len(PLAYER_1_MACHINE_ADDRESS) > 0 & len(PLAYER_2_MACHINE_ADDRESS) > 0):
         #     print("[!]All players has been connected[!]")
@@ -51,48 +53,55 @@ def Get_player_address():
         if(len(PLAYER_1_MACHINE_ADDRESS) == 0):
             print("[...]Waiting Player 1 to connect[...]")
             (recieved_data, client_address) = UDPSocket.recvfrom(server_data_buffer)
+            print(recieved_data)
             PLAYER_1_MACHINE_ADDRESS = client_address
-            new_data = int.from_bytes(recieved_data, "little")
-            print(new_data)
-            Get_player_info(recieved_data, 1)
+            Get_player_info(1)
+            print(PLAYER_1_INFO)
             print("[*]Player 1 has been connected[*]")
             print("Player 1 ID: " + str(PLAYER_1_MACHINE_ADDRESS[1]))
-            #print("Player 1 color: " + str(PLAYER_1_CUBE_COLOR))
         else:
             print("[...]Waiting Player 2 to connect[...]")
             (recieved_data, client_address) = UDPSocket.recvfrom(server_data_buffer)
             if(client_address[1] != PLAYER_1_MACHINE_ADDRESS[1]):
                 PLAYER_2_MACHINE_ADDRESS = client_address
-                print(recieved_data)
-                Get_player_info(recieved_data, 2)
+                Get_player_info(2)
+                print(PLAYER_2_INFO)
                 print("[*]Player 2 has been connected[*]")
                 print("Player 2 ID: " + str(PLAYER_2_MACHINE_ADDRESS[1]))
-               # print("Player 2 color: " + str(PLAYER_2_CUBE_COLOR))
-
+        
                 print("[!]All players has been connected[!]")
                 break
     return None
 
-def Get_player_info(data, player_number):
-    
-    global PLAYER_1_MACHINE_ADDRESS
-    global PLAYER_2_MACHINE_ADDRESS
+def Get_player_info(player_number):  
     global PLAYER_1_INFO
     global PLAYER_2_INFO
 
+    player_1_list = list(PLAYER_1_INFO)
+    player_2_list = list(PLAYER_2_INFO)
+
+    recieved_data = bytes(1)
     if(player_number == 1):
-        
+        for i in range (len(player_1_list)):
+            (recieved_data, client_address) = UDPSocket.recvfrom(server_data_buffer)
+            print(int.from_bytes(recieved_data, "little"))
+            print("[!]RECIEVED " + str(i) + " [!]")
+            player_1_list[i] = int.from_bytes(recieved_data, "little")
+        PLAYER_1_INFO = tuple(player_1_list)
     if(player_number == 2):
-        PLAYER_2_X = tuple(data[0])
-    return None
+        for i in range(len(player_2_list)):
+            (recieved_data, client_address) = UDPSocket.recvfrom(server_data_buffer)
+            player_2_list[i] = int.from_bytes(recieved_data, "little")
+        PLAYER_2_INFO = tuple(player_2_list)
+
+
 
 Get_player_address()
-
-
 while 1:
     (recieved_data, client_address) = UDPSocket.recvfrom(server_data_buffer)
-    print(PLAYER_1_X)
-    print(PLAYER_2_X)
+    print(PLAYER_1_INFO)
+    print(PLAYER_2_INFO)
+    recieved_data = str(recieved_data, "utf-8")
     if(recieved_data == "exit"):
         print("[!]SERVER HAS BEEN STOPED[!]")
         UDPSocket.close()
