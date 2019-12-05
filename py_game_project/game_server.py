@@ -26,8 +26,11 @@ PLAYER_2_MACHINE_ADDRESS = []
 PLAYER_1_INFO = PLAYER_1_X, PLAYER_1_Y, PLAYER_1_W, PLAYER_1_H, PLAYER_1_CUBE_COLOR_R, PLAYER_1_CUBE_COLOR_G, PLAYER_1_CUBE_COLOR_B = 0, 0, 0, 0, 0, 0, 0
 PLAYER_2_INFO = PLAYER_2_X, PLAYER_2_Y, PLAYER_2_W, PLAYER_2_H, PLAYER_2_CUBE_COLOR_R, PLAYER_2_CUBE_COLOR_G, PLAYER_2_CUBE_COLOR_B = 0, 0, 0, 0, 0, 0, 0
 
-# PLAYER_1_CUBE_COLOR = 255, 255, 255
-# PLAYER_2_CUBE_COLOR = 255, 255, 255
+PLAYER_1_POSITION = PLAYER_1_X, PLAYER_1_Y
+PLAYER_2_POSITION = PLAYER_2_X, PLAYER_2_Y
+
+PLAYER_1_CUBE_COLOR = 255, 255, 255
+PLAYER_2_CUBE_COLOR = 255, 255, 255
 
 # PLAYER_1_X = 0
 # PLAYER_1_Y = 0
@@ -79,7 +82,6 @@ def Get_player_info(player_number):
     player_1_list = list(PLAYER_1_INFO)
     player_2_list = list(PLAYER_2_INFO)
 
-    recieved_data = bytes(1)
     if(player_number == 1):
         for i in range (len(player_1_list)):
             (recieved_data, client_address) = UDPSocket.recvfrom(server_data_buffer)
@@ -91,6 +93,25 @@ def Get_player_info(player_number):
             player_2_list[i] = int.from_bytes(recieved_data, "little")
         PLAYER_2_INFO = tuple(player_2_list)
 
+def Get_player_position(player_number):
+    global PLAYER_1_INFO
+    global PLAYER_2_INFO
+    global PLAYER_1_POSITION
+    global PLAYER_2_POSITION
+
+    player_1_list = list(PLAYER_1_POSITION)
+    player_2_list = list(PLAYER_2_POSITION)
+
+    if(player_number == 1):
+        for i in range(len(player_1_list)):
+            (recieved_data, client_address) = UDPSocket.recvfrom(server_data_buffer)
+            player_1_list[i] = int.from_bytes(recieved_data, "little")
+        PLAYER_1_POSITION = tuple(player_1_list)
+    if(player_number == 2):
+        for i in range(len(player_2_list)):
+            (recieved_data, client_address) = UDPSocket.recvfrom(server_data_buffer)
+            player_2_list[i] = int.from_bytes(recieved_data, "little")
+        PLAYER_2_POSITION = tuple(player_2_list)
 
 
 Get_player_address()

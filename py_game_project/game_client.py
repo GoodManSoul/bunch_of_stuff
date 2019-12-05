@@ -6,12 +6,19 @@ import pygame
 
 from socket import *
 
+client_ip = "192.168.0.104"
+client_recieve_port = 4000
+
+client_address = (client_ip, client_recieve_port)
+
+UDPSocket = socket(AF_INET, SOCK_DGRAM)
+UDPSocket.bind(client_address)
+
 server_ip = "192.168.0.108"
 server_recieve_port = 1500
 
 server_address = (server_ip, server_recieve_port)
 
-UDPSocket = socket(AF_INET, SOCK_DGRAM)
 
 SCREEN_SIZE = SCREEN_WIDTH, SCREEN_HEIGHT = 950, 640
 CLEAR_SCREEN = 0, 0, 0
