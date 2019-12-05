@@ -53,7 +53,6 @@ def Get_player_address():
         if(len(PLAYER_1_MACHINE_ADDRESS) == 0):
             print("[...]Waiting Player 1 to connect[...]")
             (recieved_data, client_address) = UDPSocket.recvfrom(server_data_buffer)
-            print(recieved_data)
             PLAYER_1_MACHINE_ADDRESS = client_address
             Get_player_info(1)
             print(PLAYER_1_INFO)
@@ -84,11 +83,9 @@ def Get_player_info(player_number):
     if(player_number == 1):
         for i in range (len(player_1_list)):
             (recieved_data, client_address) = UDPSocket.recvfrom(server_data_buffer)
-            print(int.from_bytes(recieved_data, "little"))
-            print("[!]RECIEVED " + str(i) + " [!]")
             player_1_list[i] = int.from_bytes(recieved_data, "little")
         PLAYER_1_INFO = tuple(player_1_list)
-    if(player_number == 2):
+    if(player_number == 2): 
         for i in range(len(player_2_list)):
             (recieved_data, client_address) = UDPSocket.recvfrom(server_data_buffer)
             player_2_list[i] = int.from_bytes(recieved_data, "little")
